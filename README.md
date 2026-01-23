@@ -10,8 +10,7 @@ Stanford **CS336: Language Models from Scratch** 是一门强调“从零构建�
 
 **⭐ 如果这个项目对你有帮助，请您给我点一个 Star⭐**
 
-[📖 课程官网](https://stanford-cs336.github.io/spring2025/)
-
+## [📖 课程官网](https://stanford-cs336.github.io/spring2025/)
 ![](figs/fig1.png)
 ---
 
