@@ -20,7 +20,7 @@ Stanford **CS336: Language Models from Scratch** 是一门强调“从零构建�
 | 作业编号 | 主题 | 描述 | 状态 |
 |:---:|:---:|:---:|:---:|
 | **[Assignment1](Assignment1)** | Basics | 实现分词器/模型/优化器，训练一个最小语言模型 | ✅ 已完成 |
-| **Assignment2** | Systems | 做性能分析与优化（RMSNorm GPU kernel），并支持分布式/省显存训练 | 待更新 |
+| **Assignment2** | Systems | 性能分析与优化（RMSNorm GPU kernel），支持分布式/省显存训练 | 待更新 |
 | **Assignment3** | Scaling | 拟合 scaling law，用于分析模型规模增长 | 待更新 |
 | **Assignment4** | Data | 处理 Common Crawl，做清洗、过滤、去重 | 待更新 |
 | **Assignment5** | Alignment | 准备指令数据并做 RLHF，让模型更“听话” | 待更新 |
