@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class SwiGLU(nn.Module):
     """
     SwiGLU 是激活函数，它通过将输入乘以sigmoid函数，然后乘以一个线性变换来得到输出。

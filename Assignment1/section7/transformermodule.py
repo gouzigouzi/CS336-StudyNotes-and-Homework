@@ -4,6 +4,7 @@ from transformer_no_weight_block import TransformerBlock
 # from transformer_block_without_rmsnorm import TransformerBlockWithoutRMSNorm
 from embedding import EmbeddingModule
 
+
 class TransformerModule(nn.Module):
     def __init__(self, d_model:int, n_heads:int, d_ff:int, max_seq_len:int, theta:float,n_layers:int,vocab_size:int,device=None):
         super(TransformerModule, self).__init__()

@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class RoPE(nn.Module):
     """
     RoPE 是旋转位置编码，它通过将输入的稠密向量旋转来稳定训练。

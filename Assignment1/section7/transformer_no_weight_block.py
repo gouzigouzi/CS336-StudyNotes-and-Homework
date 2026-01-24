@@ -5,6 +5,7 @@ from RMSnorm import RMSNorm
 from SwiGLU import SwiGLU
 from rope import RoPE
 
+
 class TransformerBlock(nn.Module):
     """
     TransformerBlock 是Transformer块，它把包含多头注意力机制的一些组件包装在一起，形成一个完整的Transformer块。

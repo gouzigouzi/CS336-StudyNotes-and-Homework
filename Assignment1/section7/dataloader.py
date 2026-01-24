@@ -3,6 +3,7 @@ import numpy as np
 from typing import List
 import torch
 
+
 class DataLoader:
     def __init__(self, data:List[int], batch_size:int, context_length:int, shuffle=True):
         self.data = data

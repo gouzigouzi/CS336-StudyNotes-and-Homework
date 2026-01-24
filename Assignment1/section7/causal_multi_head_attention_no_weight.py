@@ -2,6 +2,7 @@ import torch
 import torch.nn as nn
 from rope import RoPE
 
+
 class CausalMultiHeadAttentionNoWeight(nn.Module):
     def __init__(self, d_model:int, n_heads:int, max_seq_len:int, theta:float,device=None):
         super(CausalMultiHeadAttentionNoWeight, self).__init__()

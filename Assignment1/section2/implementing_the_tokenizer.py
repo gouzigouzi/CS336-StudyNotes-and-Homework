@@ -3,6 +3,8 @@ from typing import Dict, List, Set, Tuple, Iterable, Iterator
 import regex
 import json
 import tiktoken
+
+
 def gpt2_bytes_to_unicode_local(): # 
     """
     将字节转换为Unicode字符,调用函数直接就返回字典{数字:unicode字符}结果
@@ -79,6 +81,7 @@ class implement_bpe_tokenizer:
             )
         else:
             self._special_tokens_pattern = None
+
     @classmethod
     def from_files(cls, vocab_filepath: str, merges_filepath: str, special_tokens: List[str] | None = None):
         """
@@ -130,7 +133,6 @@ class implement_bpe_tokenizer:
 
         return cls(vocab, merges, special_tokens)
 
-    
     def pre_tokenize(self,text:str)->List[str]:
         """
         将文本预处理为字节块列表。
@@ -138,7 +140,6 @@ class implement_bpe_tokenizer:
         PAT = r"'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"
         tokens = regex.findall(PAT,text)
         return tokens
-    
     
     def merge_tokens(self,token_bytes:bytes)->List[bytes]:
         """
@@ -175,7 +176,6 @@ class implement_bpe_tokenizer:
             token_list_bytes = token_list_bytes[:best_pair_position] + [merged_token_bytes] + token_list_bytes[best_pair_position+2:] # 更新token_list_bytes
         return token_list_bytes
 
-
     def _bpe_encode_segment(self, text_bytes: bytes) -> List[int]:
         """
         对一个非特殊符号的字节段进行 BPE 编码。
@@ -192,7 +192,6 @@ class implement_bpe_tokenizer:
                 for byte in token:
                     encoded_ids.append(self._bytes_to_id[bytes([byte])])
         return encoded_ids
-
 
     def encode(self,text:str)->list[int]:
         """
@@ -253,7 +252,6 @@ class implement_bpe_tokenizer:
         # 将所有字节串拼接起来，然后解码为UTF-8字符串
         return b''.join(decoded_bytes_list).decode('utf-8', errors='replace') # 使用 errors='replace' 处理解码错误
     
-
 
 if __name__ == "__main__":
     # 测试

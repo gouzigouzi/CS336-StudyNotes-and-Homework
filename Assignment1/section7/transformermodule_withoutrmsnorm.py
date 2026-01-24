@@ -4,6 +4,7 @@ import torch.nn as nn
 from transformer_block_without_rmsnorm import TransformerBlock
 from embedding import EmbeddingModule
 
+
 class TransformerModuleWithoutRMSNorm(nn.Module):
     def __init__(self, d_model:int, n_heads:int, d_ff:int, max_seq_len:int, theta:float,n_layers:int,vocab_size:int,device=None):
         super(TransformerModuleWithoutRMSNorm, self).__init__()

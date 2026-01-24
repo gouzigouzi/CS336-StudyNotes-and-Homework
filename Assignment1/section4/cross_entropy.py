@@ -1,4 +1,4 @@
-from hw3.softmax import softmax
+from section3.softmax import softmax
 import torch
 
 

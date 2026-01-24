@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class ScaledDotProductAttention(nn.Module):
     """
     ScaledDotProductAttention 是缩放点积注意力，它通过将输入的稠密向量与输入的稠密向量进行点积来得到输出。

@@ -25,7 +25,6 @@ def gpt2_bytes_to_unicode_local(): # 使用局部名称避免潜在冲突
     return dict(zip(bs, cs))
 
 
-
 def get_stats(token_sequences: List[List[str]]) -> collections.Counter:
         """
         统计token序列中所有相邻unicode字符对的频率
@@ -36,6 +35,7 @@ def get_stats(token_sequences: List[List[str]]) -> collections.Counter:
                 pair = (sequence[i], sequence[i+1])
                 pair_counts[pair] += 1
         return pair_counts
+
 
 def merge_pair_in_sequences(
     token_sequences: List[List[str]],
@@ -69,7 +69,6 @@ def merge_pair_in_sequences(
                 i += 1
         new_overall_sequences.append(new_sequence)
     return new_overall_sequences
-
 
 
 def run_train_bpe(

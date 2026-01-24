@@ -6,6 +6,7 @@ import regex
 from collections import defaultdict
 import pickle
 
+
 def merge_token_sequence(token_seq: Tuple, best_pair: Tuple, new_token: bytes) -> Tuple:
     """在一个token序列中，将所有出现的 best_pair 合并为 new_token"""
     new_seq = []
@@ -19,6 +20,7 @@ def merge_token_sequence(token_seq: Tuple, best_pair: Tuple, new_token: bytes) -
             new_seq.append(token_seq[i])
             i += 1
     return tuple(new_seq)
+
 
 def run_train_bpe(
     input_path: str | os.PathLike,

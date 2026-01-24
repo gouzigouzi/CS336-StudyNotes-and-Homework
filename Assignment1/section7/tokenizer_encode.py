@@ -4,6 +4,7 @@ from typing import Iterable, Iterator, List, Set, Tuple
 import torch
 PAT = r"""'(?:[sdmt]|ll|ve|re)| ?\p{L}+| ?\p{N}+| ?[^\s\p{L}\p{N}]+|\s+(?!\S)|\s+"""
 
+
 class Tokenizer:
     def __init__(self, vocab, merges, special_tokens=None):
         self.vocab = vocab
@@ -13,7 +14,6 @@ class Tokenizer:
         self.merges_priority_map = {pair: i for i, pair in enumerate(self.merges)}
         # 将字节转换为token id，避免直接使用vocab字典
         self.bytes_to_id = {v: k for k, v in self.vocab.items()}
-
 
     def _get_bpe_merges(self, piece: bytes) -> List[bytes]:
         """

@@ -1,5 +1,6 @@
-# from hw3.softmax import softmax
 import torch
+
+
 class CrossEntropyLoss:
     def __init__(self):
         """

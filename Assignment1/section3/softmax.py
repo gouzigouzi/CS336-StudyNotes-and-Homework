@@ -1,4 +1,6 @@
 import torch
+
+
 def softmax(x: torch.Tensor, dim: int) -> torch.Tensor:
     """
     softmax 是归一化技术，它通过将输入除以输入的指数的平均值来稳定训练。

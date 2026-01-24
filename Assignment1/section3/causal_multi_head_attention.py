@@ -3,6 +3,7 @@ import torch.nn as nn
 import math
 import torch.nn.functional as F
 
+
 """
 原始的输入形状是(batch_size, seq_len, d_model)
 0.对于输入，要先用W_q, W_k, W_v 线性变换得到q,k,v
@@ -10,7 +11,6 @@ import torch.nn.functional as F
 2.对于每个头，对于q,k,v都去做attention操作。
 3.最后把所有的头按照最后一个维度concat起来，然后做一次线性变换。
 """
-
 class CausalMultiHeadAttention(nn.Module):
     """
     CausalMultiHeadAttention 是因果多头注意力，它通过将输入的稠密向量与输入的稠密向量进行点积来得到输出。

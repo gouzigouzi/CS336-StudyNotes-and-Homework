@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 
+
 class EmbeddingModule(nn.Module):
     def __init__(self, vocab_size:int, d_model:int, device=None):
         super(EmbeddingModule, self).__init__()

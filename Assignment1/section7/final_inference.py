@@ -4,6 +4,7 @@ from inference import decode_token
 import pickle
 from tokenizer_encode import Tokenizer
 
+
 # 定义模型结构（参数要和训练时一致）
 vocab_size = 10000
 context_length = 256

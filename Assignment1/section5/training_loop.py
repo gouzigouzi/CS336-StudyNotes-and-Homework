@@ -15,9 +15,11 @@ max_iters = 50     # 极少的迭代次数
 learning_rate = 0.01
 device = 'cpu'     # 明确使用CPU
 
+
 # 生成微型数据集 (1000个token)
 def create_mini_dataset():
     return np.random.randint(0, vocab_size, size=1000)
+
 
 # 简化版Transformer模型
 class NanoTransformer(nn.Module):
@@ -49,6 +51,7 @@ class NanoTransformer(nn.Module):
         x = self.blocks(x)
         logits = self.head(x)
         return logits
+
 
 # 创建微型数据集
 train_data = create_mini_dataset()

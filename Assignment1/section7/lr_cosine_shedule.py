@@ -1,5 +1,6 @@
 import math
 
+
 class CosineSchedule:
     def __init__(self, max_learning_rate, min_learning_rate, warmup_iters, cosine_cycle_iters):
         self.max_learning_rate = max_learning_rate

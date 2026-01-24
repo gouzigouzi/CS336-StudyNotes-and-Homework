@@ -7,6 +7,7 @@ from RMSnorm import RMSNorm
 from SwiGLU import SwiGLU
 from softmax import softmax
 
+
 class TransformerLM(nn.Module):
     """
     TransformerLM 是整个训练过程的封装，它把包含Embedding、TransformerBlock、RMSNorm、LinearModule等组件包装在一起，形成一个完整的Transformer语言模型。

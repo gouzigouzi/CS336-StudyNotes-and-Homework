@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 class RMSNorm(nn.Module):
     """
     RMSNorm 是归一化技术，它通过将输入除以输入的平方根的平均值来稳定训练。

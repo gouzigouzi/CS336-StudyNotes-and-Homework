@@ -1,5 +1,6 @@
 import torch
 
+
 def top_p_sampling(probabilities, top_p=0.9):
     """
     Top-p 核采样
@@ -23,6 +24,7 @@ def top_p_sampling(probabilities, top_p=0.9):
     next_token_idx = torch.gather(idx,dim=-1,index=next_token_idx)
     # 返回下一个token
     return next_token_idx
+
 
 def temperature_scaling(logits,temperature=1.0):
     """

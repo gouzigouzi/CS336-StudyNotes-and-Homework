@@ -1,6 +1,7 @@
 import torch
 from torch import nn
 
+
 """在讲义中，线性层在最后一步将d_model维度映射到vocab_size维度"""
 class LinearModule(nn.Module):
     def __init__(self, in_features: int, out_features: int, device: torch.device | None = None, dtype: torch.dtype | None = None):

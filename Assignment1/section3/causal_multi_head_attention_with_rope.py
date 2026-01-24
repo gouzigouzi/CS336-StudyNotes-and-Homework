@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
-from hw3.rope import RoPE
+from rope import RoPE
+
 
 class CausalMultiHeadAttentionWithRoPE(nn.Module):
     def __init__(self, d_model:int, n_heads:int, max_seq_len:int, theta:float, device=None):
