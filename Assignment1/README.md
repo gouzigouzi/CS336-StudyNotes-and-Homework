@@ -1,6 +1,6 @@
 # Assignment 1 (basics): Building a Transformer LM
 
-## 1 课程作业整体介绍
+## [1 课程作业整体介绍](section1)
 接下来我们将开始 Assignment1 的学习
 
 **你将实现的内容：**
@@ -46,3 +46,20 @@
    - 将模型应用于更大的 OpenWebText 数据集进行训练。
    - 在测试集上评估最终模型的困惑度，并将结果提交至课程指定的排行榜。
 
+---
+## [2 分词 (Tokenization)](section2)
+
+---
+## [3 Transformer 语言模型架构](section3)
+
+---
+## [4 训练Transformer LM](section4)
+
+---
+## [5 训练与生成](section5)
+
+---
+## [6 生成文本（Generating text）](section6)
+
+---
+## [7 Experiments](section7)
