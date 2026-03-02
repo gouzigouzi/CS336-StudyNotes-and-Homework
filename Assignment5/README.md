@@ -30,4 +30,4 @@
 ## [4 对 MATH 数据集的监督微调（Supervised Finetuning, SFT）](section4)
 
 ---
-## [5 MATH 数据集的专家迭代）](section5)
+## [5 MATH 数据集的专家迭代](section5)
