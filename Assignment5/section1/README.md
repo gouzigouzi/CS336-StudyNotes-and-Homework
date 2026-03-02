@@ -19,15 +19,3 @@
 
 **可使用的工具：**
 我们希望你从零构建大多数与强化学习（RL）相关的组件。你可使用 vLLM 等工具生成语言模型的文本输出（详见 3.1 节）。此外，你可使用 HuggingFace Transformers 加载 Qwen 2.5 Math 1.5B 模型和分词器，并执行前向传播（详见 4.1 节），但不得使用任何训练工具（如 Trainer 类）。
-
----
-## [2 语言模型的推理能力](section2)
-
----
-## [3 Measuring Zero-Shot MATH Performance](section3)
-
----
-## [4 对 MATH 数据集的监督微调（Supervised Finetuning, SFT）](section4)
-
----
-## [5 MATH 数据集的专家迭代）](section5)
