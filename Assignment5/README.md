@@ -31,3 +31,9 @@
 
 ---
 ## [5 MATH 数据集的专家迭代](section5)
+
+---
+## [6 策略梯度入门( Primer on Policy Gradients)](section6)
+
+---
+## [7 Group Relative Policy Optimization](section7)
