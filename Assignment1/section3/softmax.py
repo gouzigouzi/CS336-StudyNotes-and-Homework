@@ -15,8 +15,8 @@ def softmax(x: torch.Tensor, dim: int) -> torch.Tensor:
         out: (batch_size, seq_len, d_model) 归一化后的稠密向量
     """
     x_max = x.max(dim=dim, keepdim=True)[0] # batch_size, seq_len, 1
-    x_exp = torch.exp(x - x_max)  # batch_size, seq_len, d_model
+    x = torch.exp(x - x_max)  # batch_size, seq_len, d_model
     x_sum = x.sum(dim=dim, keepdim=True)  # batch_size, seq_len, 1
-    return x_exp / x_sum
+    return x / x_sum
 
 
