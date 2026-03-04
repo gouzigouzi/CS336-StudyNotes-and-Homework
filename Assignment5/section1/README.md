@@ -1,6 +1,6 @@
 # CS336 Assignment 5 (alignment): Alignment and Reasoning RL
 
-## [1 课程作业整体介绍](section1)
+## 1 课程作业整体介绍
 在本次作业中，你将获得训练语言模型解决数学问题时进行推理的实践经验。
 
 **你将实现的内容：**

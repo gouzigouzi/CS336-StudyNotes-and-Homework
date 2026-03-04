@@ -151,3 +151,222 @@ def compute_naive_policy_gradient_loss(
 
 代码可见 [run_compute_naive_policy_gradient_loss.py](run_compute_naive_policy_gradient_loss.py)
 
+**GRPO-Clip 损失**
+接下来实现更核心的 GRPO-Clip 损失。逐 token GRPO-Clip 损失为：
+$$-\min\left( \frac{\pi_{\theta}\left(o_{t} | q, o_{<t}\right)}{\pi_{\theta_{old}}\left(o_{t} | q, o_{<t}\right)} A_{t}, clip\left( \frac{\pi_{\theta}\left(o_{t} | q, o_{<t}\right)}{\pi_{\theta_{old}}\left(o_{t} | q, o_{<t}\right)},1-\epsilon,1+\epsilon \right) A_{t} \right)$$
+
+**问题（compute_grpo_clip_loss）：GRPO-Clip损失（2分）**
+交付要求：实现 `compute_grpo_clip_loss` 方法，计算逐 token GRPO-Clip 损失。
+
+推荐接口：
+```python
+def compute_grpo_clip_loss(
+    advantages: torch.Tensor,
+    policy_log_probs: torch.Tensor,
+    old_log_probs: torch.Tensor,
+    cliprange: float,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+    """    
+    参数：
+        advantages: 形状为(batch_size, 1)的张量，每个样本的优势值A
+        policy_log_probs: 形状为(batch_size, sequence_length)的张量，待训练策略的逐token对数概率
+        old_log_probs: 形状为(batch_size, sequence_length)的张量，旧策略的逐token对数概率
+        cliprange: 裁剪参数ε（例如0.2）
+    
+    返回：
+        tuple[torch.Tensor, dict[str, torch.Tensor]]:
+            loss: 形状为(batch_size, sequence_length)的张量，逐token裁剪损失
+            metadata: 需记录的元数据（建议记录每个token是否被裁剪，即min函数右侧的裁剪后损失是否小于左侧）
+    """
+```
+实现提示：
+- 将优势值在sequence_length维度上广播（broadcast）
+
+测试方法：实现 `[adapters.run_compute_grpo_clip_loss]`，运行命令 `uv run pytest -k test_compute_grpo_clip_loss` 并确保测试通过。
+
+代码可见 [run_compute_grpo_clip_loss.py](run_compute_grpo_clip_loss.py)
+
+**策略梯度损失包装器**
+我们将通过对比实验验证三种策略梯度变体：
+(a) 无基线（no_baseline）：无基线的朴素策略梯度损失，优势值直接为原始奖励 $A=R(q, o)$
+(b) reinforce_with_baseline：使用组归一化奖励作为优势值（advantage）的朴素策略梯度损失。如果 $\bar{r}$ 是来自 compute_group_normalized_rewards 的组归一化奖励（可能已或未按组标准差归一化），那么优势值 $A = \bar{r}$。
+（c）grpo_clip：GRPO-Clip 损失函数
+
+为方便起见，我们将实现一个包装器（wrapper），使我们能够轻松在这三种策略梯度损失函数之间切换。
+
+**问题（compute_policy_gradient_loss）：策略梯度包装器（1分）**
+交付要求：实现 `compute_policy_gradient_loss` 函数——一个便捷包装器，用于调度至对应的损失计算流程（`no_baseline`、`reinforce_with_baseline` 或 `grpo_clip`），并返回逐 token 损失（per-token loss）及所有辅助统计信息。
+
+推荐接口如下：
+```python
+def compute_policy_gradient_loss(
+    policy_log_probs: torch.Tensor,
+    loss_type: Literal["no_baseline", "reinforce_with_baseline", "grpo_clip"],
+    advantages: torch.Tensor | None = None,
+    raw_rewards: torch.Tensor | None = None,
+    old_log_probs: torch.Tensor | None = None,
+    cliprange: float | None = None,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+```
+功能：选择并计算目标策略梯度损失。
+
+参数说明：
+- `policy_log_probs`：形状为（batch_size, sequence_length），表示待训练策略的逐 token 对数概率。
+- `loss_type`：损失类型，可选值为 “no_baseline”、“reinforce_with_baseline” 或 “grpo_clip”。
+- `raw_rewards`：当 loss_type == "no_baseline" 时为必填项，形状为（batch_size, 1）。
+- `advantages`：当 loss_type 为 “reinforce_with_baseline” 或 “grpo_clip” 时为必填项，形状为（batch_size, 1）。
+- `old_log_probs`：当 loss_type == "grpo_clip" 时为必填项，形状为（batch_size, sequence_length）。
+- `cliprange`：当 loss_type == "grpo_clip" 时为必填项，用于裁剪的标量参数 ϵ。
+
+返回值：
+- 元组（torch.Tensor, dict[str, torch.Tensor]）：
+   1. 损失张量（loss）：形状为（batch_size, sequence_length），即逐token损失。
+   2. 元数据字典（metadata）：包含底层计算流程的统计信息（例如 GRPO-Clip 的裁剪比例）。
+
+实现提示：
+1. 调用 `compute_naive_policy_gradient_loss` 或 `compute_grpo_clip_loss` 完成具体计算。
+2. 执行参数校验（参考上述断言模式）。
+3. 将所有返回的元数据汇总到单个字典中。
+
+测试方式：实现 `[adapters.run_compute_policy_gradient_loss]`，运行命令 `uv run pytest -k test_compute_policy_gradient_loss` 并验证测试通过。
+
+代码可见 [run_compute_policy_gradient_loss.py](run_compute_policy_gradient_loss.py)
+
+**掩码均值（Masked Mean）**
+截至目前，我们已具备计算优势函数（advantages）、对数概率、逐 token 损失，以及逐 token 熵、裁剪比例等辅助统计信息的计算能力。为将形状为（batch_size, sequence_length）的 per-token loss tensors 缩减为损失向量（每个样本对应一个标量损失），我们将在序列维度上计算损失的均值，但仅包含响应对应的索引（即 mask[i, j]==1 的token位置）。
+
+在大多数基于大语言模型（LLM）的强化学习（RL）代码库中，按序列长度归一化是标准操作，但这一做法的合理性尚未明确——观察公式（21）中策略梯度估计的定义可知，其中并不存在归一化因子 $\frac{1}{T^{(i)}}$。我们将先采用这一标准方法（通常称为 `masked_mean`），后续再测试 SFT 阶段实现的 `masked_normalize` 方法。
+
+该函数支持**指定**均值计算的维度：若 `dim = None`，则对所有掩码为 1 的元素计算均值。这一功能可用于获取响应 token 的平均逐 token 熵、裁剪比例等统计信息。
+
+**问题（masked_mean）：掩码均值（1分）**
+交付要求：实现 `masked_mean` 方法，在尊重布尔掩码（boolean mask）的前提下对张量元素求平均。
+
+推荐接口如下：
+```python
+def masked_mean(
+    tensor: torch.Tensor,
+    mask: torch.Tensor,
+    dim: int | None = None,
+) -> torch.Tensor:
+```
+功能：沿指定维度计算张量的均值，仅考虑 `mask == 1` 的元素。
+
+参数说明：
+- `tensor`：待求平均的输入数据张量。
+- `mask`：与 tensor 形状相同的布尔掩码张量，值为1的位置将纳入均值计算。
+- `dim`：计算均值的维度；若为 None，则对所有掩码为1的元素计算全局均值。
+
+返回值：
+- 掩码均值张量（torch.Tensor）：形状与 `tensor.mean(dim)` 的输出语义一致。
+
+测试方式：实现 `[adapters.run_masked_mean]`，运行命令 `uv run pytest -k test_masked_mean` 并确保测试通过。
+
+代码可见 [run_masked_mean.py](run_masked_mean.py)
+
+**GRPO 微批次训练步骤（GRPO Microbatch Train Step）**
+现在我们可以实现 GRPO 的单个 microbatch train step（回想一下，对于一个训练小批次，若 `gradient_accumulation_steps` > 1，我们会迭代多个 microbatch）。
+
+具体而言，给定原始奖励（raw rewards）或优势函数（advantages）及对数概率，我们将计算逐 token 损失，通过 masked_mean 聚合为每个样本的标量损失，在批次维度上求平均，根据梯度累积步数调整损失，并执行反向传播。
+
+**问题（grpo_microbatch_train_step）：微批次训练步骤（3分）**
+交付要求：实现 GRPO 的单个微批次更新，包括策略梯度损失计算、掩码均值聚合及梯度缩放。
+
+推荐接口如下：
+```python
+def grpo_microbatch_train_step(
+    policy_log_probs: torch.Tensor,
+    response_mask: torch.Tensor,
+    gradient_accumulation_steps: int,
+    loss_type: Literal["no_baseline", "reinforce_with_baseline", "grpo_clip"],
+    raw_rewards: torch.Tensor | None = None,
+    advantages: torch.Tensor | None = None,
+    old_log_probs: torch.Tensor | None = None,
+    cliprange: float | None = None,
+) -> tuple[torch.Tensor, dict[str, torch.Tensor]]:
+```
+功能：对单个微批次执行前向传播与反向传播。
+
+参数说明：
+- `policy_log_probs`：形状为（batch_size, sequence_length），表示待训练策略的逐 token 对数概率。
+- `response_mask`：形状为（batch_size, sequence_length），响应 token 位置标记为 1，提示词（prompt）/ 填充（padding）token 位置标记为 0。
+- `gradient_accumulation_steps`：每个优化器步骤对应的微批次数量。
+- `loss_type`：损失类型，可选值为 “no_baseline”、“reinforce_with_baseline” 或 “grpo_clip”。
+- `raw_rewards`：当 loss_type == "no_baseline" 时为必填项，形状为（batch_size, 1）。
+- `advantages`：当 loss_type != "no_baseline" 时为必填项，形状为（batch_size, 1）。
+- `old_log_probs`：当 loss_type == "grpo_clip" 时为必填项，形状为（batch_size, sequence_length）。
+- `cliprange`：GRPO-Clip 策略的裁剪参数 ϵ。
+
+返回值：
+- 元组（torch.Tensor, dict[str, torch.Tensor]）：
+  1. 标量损失张量（loss）：经梯度累积调整后的微批次损失，用于日志记录。
+  2. 元数据字典（metadata）：包含底层损失计算的元数据及其他需日志记录的统计信息。
+
+实现提示：
+1. 需在该函数中调用 `loss.backward()`，并确保根据梯度累积步数调整损失。
+
+测试方式：实现 `[adapters.run_grpo_microbatch_train_step]`，运行命令 `uv run pytest -k test_grpo_microbatch_train_step` 并确认测试通过。
+
+代码可见 [run_grpo_microbatch_train_step.py](run_grpo_microbatch_train_step.py)
+
+**整合所有模块：GRPO 训练循环（Putting it all together: GRPO Train Loop）**
+现在我们将整合所有模块，实现完整的 GRPO 训练循环。请参考 7.1 节的算法框架，合理调用已实现的方法。
+
+以下提供初始超参数配置：若实现正确，使用该配置应能获得合理结果。
+```python
+n_grpo_steps: int = 200
+learning_rate: float = 1e-5
+advantage_eps: float = 1e-6
+rollout_batch_size: int = 256  # 滚动/采样批次大小。这一轮采样总共生成了多少个回答。
+group_size: int = 8  # 组大小。针对同一个提示词 (Prompt)，模型独立生成的回答数量。
+sampling_temperature: float = 1.0
+sampling_min_tokens: int = 4  # 参考 Expiter，禁止空字符串响应
+sampling_max_tokens: int = 1024
+epochs_per_rollout_batch: int = 1  # 在线策略（On-policy）
+train_batch_size: int = 256  # 在线策略，训练总批次
+gradient_accumulation_steps: int = 128  # 微批次大小为 2，可在 H100 显卡上运行，梯度累加步数。显卡一次吃不下 256 条，我们就把它拆成 128 份，分 128 次喂给显卡。每次只计算梯度，但不更新参数，把梯度在内存里累加起来。
+gpu_memory_utilization: float = 0.85
+loss_type: Literal["no_baseline", "reinforce_with_baseline", "grpo_clip"] = "reinforce_with_baseline"
+use_std_normalization: bool = True
+
+optimizer = torch.optim.AdamW(
+    policy.parameters(),
+    lr=learning_rate,
+    weight_decay=0.0,
+    betas=(0.9, 0.95),
+)
+```
+上述默认超参数适用于**在线策略（On-policy）** 场景：每个滚动批次（rollout batch）仅执行一次梯度更新。此时需满足 `train_batch_size == rollout_batch_size` 且 `epochs_per_rollout_batch == 1`。在线策略（On-policy）意味着模型刚才自己做出来的题（Rollout 生成的数据），必须立刻拿来训练更新，绝不用旧数据。
+
+以下提供一些合理性校验断言及常量定义，可规避部分边界情况并提供实现指引：
+```python
+assert train_batch_size % gradient_accumulation_steps == 0, "train_batch_size 必须能被 gradient_accumulation_steps 整除"
+micro_train_batch_size = train_batch_size // gradient_accumulation_steps  # 微批次，这是显卡真正单次前向/反向传播处理的数据量。
+
+assert rollout_batch_size % group_size == 0, "rollout_batch_size 必须能被 group_size 整除"
+n_prompts_per_rollout_batch = rollout_batch_size // group_size  # 提示词数量。这一轮一共抽了多少道不一样的题（Prompt）给模型做
+
+assert train_batch_size >= group_size, "train_batch_size 必须大于或等于 group_size"
+
+n_microbatches_per_rollout_batch = rollout_batch_size // micro_train_batch_size  # 计算在一个完整的“采样生成批次”（rollout batch）的数据量里，一共包含了多少个用于显卡前向/反向传播计算的“微小训练批次”（micro-batch）。
+```
+以下是一些额外的建议：
+- 记得使用 r1_zero prompt，并指示 vLLM 在遇到第二个 `</answer>` 标签时停止生成，如之前实验中所做的那样。
+- 建议使用 typer 进行命令行参数解析。
+- 使用梯度裁剪（gradient clipping），裁剪值设为 1.0。
+- 应定期记录验证奖励（例如每 5 或 10 步记录一次）。在比较超参数时，应至少在 1024 个验证样本上进行评估，因为 CoT/RL 的评估结果可能存在较大噪声。
+- 在我们当前的损失实现中，GRPO-Clip 仅应在离策略（off-policy）设置下使用（因为它需要旧的对数概率）。
+- 在 off-policy 设置中，若对每个 rollout batch 执行多个 epoch 的梯度更新，每次都重新计算旧的对数概率是低效的。更高效的做法是只计算一次旧的对数概率，并在每个 epoch 中重复使用。
+- 不应对旧的对数概率进行梯度求导。
+- 在每次优化器更新时，应记录以下部分或全部指标：
+  - 损失（loss）
+  - 梯度范数（gradient norm）
+  - token 熵（token entropy）
+  - 裁剪比例（clip fraction），如果是离策略训练
+  - 训练奖励（train rewards），包括总奖励、格式奖励和答案奖励
+  - 任何你认为对调试有帮助的其他信息
+
+**问题（grpo_train_loop）：GRPO训练循环（5分）**
+交付要求：实现 GRPO 的完整训练循环。基于 MATH 数据集启动策略训练，确认验证奖励（validation rewards）逐步提升，且不同阶段的采样结果（rollouts）合理。提供验证奖励随训练步数变化的图表，并附上不同时期的若干采样示例。
+
+代码可见 [run_grpo_train_loop.py](run_grpo_train_loop.py)
