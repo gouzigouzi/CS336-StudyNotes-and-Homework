@@ -139,6 +139,8 @@ $$\log p_{\theta}(y \mid x) = \log\!\left[\operatorname{softmax}\!\big(f_{\theta
 
 你应当使用一种数值稳定的方法来计算该值，并可自由使用 `torch.nn.functional` 中的方法。我们还建议增加一个可选参数，用于选择性地计算并返回每个 token 的熵。
 
+用对数概率而不是原始概率，是因为多个极小概率相乘容易导致“数值下溢”归零，转成对数后乘法就变成了平稳的加法。
+
 **问题（get_response_log_probs）：响应对数概率（及熵）（2分）**
 交付要求 实现 `get_response_log_probs` 方法，用于从因果语言模型中获取逐token条件对数概率（基于前文token），并可选返回模型下一个token分布的熵。推荐接口：
 ```python
